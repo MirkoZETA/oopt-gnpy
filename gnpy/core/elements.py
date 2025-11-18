@@ -1427,9 +1427,13 @@ class Edfa(_Node):
         self.nch = spectral_info.number_of_channels
         pin = spectral_info.signal + spectral_info.ase + spectral_info.nli
         self.pin_db = watt2dbm(sum(pin))
-        # The following should be changed when we have the new spectral information including slot widths.
-        # For now, with homogeneous spectrum, we can calculate it as the difference between neighbouring channels.
-        self.slot_width = self.channel_freq[1] - self.channel_freq[0]
+        # Use slot_width from SpectralInformation
+        # Temporary workaround when a single channel is propagated (central f_min = central f_max).
+        # For multiple channels, compute as always; for single channel, use its slot_width
+        if len(self.channel_freq) >= 2:
+            self.slot_width = self.channel_freq[1] - self.channel_freq[0]
+        else:
+            self.slot_width = spectral_info.slot_width[0]
 
         # check power saturation and correct effective gain & power accordingly:
         # Compute the saturation accounting for actual power at the input of the amp
